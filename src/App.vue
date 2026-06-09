@@ -1,35 +1,92 @@
 <template>
-  <div
-    class="h-screen flex items-center justify-center bg-[#0f0b1f]"
-  >
-    <div
-      class="bg-[#1d1536] border border-[#6f52c9]
-             px-10 py-6 rounded-3xl shadow-2xl"
-    >
-      <h1 class="text-5xl font-bold text-[#efe9ff]">
-        Yume
-      </h1>
+  <div class="desktop">
+    <WindowFrame>
+      <TopBar />
+      <div class="content">
+        <div class="left">
+          <ServersPanel />
+          <FavoritesPanel />
+        </div>
 
-      <p class="text-[#b8a8e6] mt-2">
-        Dreaming digitally.
-      </p>
-    </div>
+        <div class="center">
+          <SearchPanel />
+          <WidgetsPanel />
+        </div>
+
+        <div class="right">
+          <NewsPanel />
+        </div>
+      </div>
+    </WindowFrame>
   </div>
 </template>
 
-<style>
-body {
-  margin: 0;
-  background: #0f0b1f;
-  color: white;
-  font-family: Arial, sans-serif;
-}
+<script setup lang="ts">
+import WindowFrame from './components/WindowFrame.vue'
+import TopBar from './components/TopBar.vue'
 
-.app {
-  height: 100vh;
+import ServersPanel from './components/ServersPanel.vue'
+import FavoritesPanel from './components/FavoritesPanel.vue'
+
+import SearchPanel from './components/SearchPanel.vue'
+import WidgetsPanel from './components/WidgetsPanel.vue'
+
+import NewsPanel from './components/NewsPanel.vue'
+</script>
+
+<style scoped>
+.desktop {
+  min-height: 100vh;
 
   display: flex;
   justify-content: center;
   align-items: center;
+
+  padding: 24px;
+
+  background-image: url('./assets/wallpaper.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+.content {
+  display: grid;
+
+  /*
+    Esquerda | Centro | Direita
+  */
+  grid-template-columns: 280px 1fr 320px;
+
+  gap: 12px;
+
+  align-items: start;
+}
+
+.left,
+.center,
+.right {
+  display: flex;
+  flex-direction: column;
+
+  gap: 12px;
+
+  min-width: 0;
+}
+
+.center {
+  min-width: 420px;
+}
+
+/* Responsividade */
+@media (max-width: 1100px) {
+  .content {
+    grid-template-columns: 1fr;
+  }
+
+  .center {
+    min-width: auto;
+  }
 }
 </style>
