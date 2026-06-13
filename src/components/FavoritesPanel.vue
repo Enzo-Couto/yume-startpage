@@ -11,7 +11,6 @@
         :href="favorite.url"
         class="favorite-item"
       >
-        <span class="icon">{{ favorite.icon }}</span>
         <span>{{ favorite.name }}</span>
       </a>
     </div>
@@ -21,32 +20,26 @@
 <script setup>
 const favorites = [
   {
-    icon: "💬",
     name: "ChatGPT",
     url: "https://chatgpt.com"
   },
   {
-    icon: "📺",
     name: "YouTube",
     url: "https://youtube.com"
   },
   {
-    icon: "💻",
     name: "GitHub",
     url: "https://github.com"
   },
   {
-    icon: "🎮",
     name: "RuneScape",
     url: "https://www.runescape.com"
   },
   {
-    icon: "🚓",
     name: "FiveM",
     url: "https://fivem.net"
   },
   {
-    icon: "🎵",
     name: "Spotify",
     url: "https://open.spotify.com"
   }

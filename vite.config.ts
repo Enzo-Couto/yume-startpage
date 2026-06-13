@@ -7,4 +7,6 @@ export default defineConfig({
     vue(),
     tailwindcss(),
   ],
+
+  base: '/yume-startpage/'
 })

@@ -4,7 +4,7 @@
       <TopBar />
       <div class="content">
         <div class="left">
-          <ServersPanel />
+          <NotesPanel />
           <FavoritesPanel />
         </div>
 
@@ -25,7 +25,8 @@
 import WindowFrame from './components/WindowFrame.vue'
 import TopBar from './components/TopBar.vue'
 
-import ServersPanel from './components/ServersPanel.vue'
+import SpotifyPanel from './components/SpotifyPanel.vue'
+import NotesPanel from './components/NotesPanel.vue'
 import FavoritesPanel from './components/FavoritesPanel.vue'
 
 import SearchPanel from './components/SearchPanel.vue'
