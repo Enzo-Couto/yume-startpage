@@ -5,20 +5,27 @@
     </div>
 
     <div class="panel-body">
+      <div
+        v-if="loading"
+        class="loading"
+      >
+        Loading stories...
+      </div>
+
       <a
-        v-for="news in newsList"
-        :key="news.title"
-        :href="news.url"
+        v-for="story in stories"
+        :key="story.id"
+        :href="story.url"
         target="_blank"
         rel="noopener noreferrer"
         class="news-item"
       >
         <div class="news-title">
-          {{ news.title }}
+          {{ story.title }}
         </div>
 
-        <div class="news-source">
-          {{ news.source }}
+        <div class="news-meta">
+          {{ story.domain }} • {{ story.score }} points
         </div>
       </a>
     </div>
@@ -26,39 +33,94 @@
 </template>
 
 <script setup lang="ts">
-const newsList = [
-  {
-    title: 'New Linux vulnerability discovered',
-    source: 'Hacker News',
-    url: 'https://news.ycombinator.com/'
-  },
-  {
-    title: 'Researchers warn about phishing campaign',
-    source: 'Krebs on Security',
-    url: 'https://krebsonsecurity.com/'
-  },
-  {
-    title: 'Mozilla releases Firefox update',
-    source: 'Mozilla Blog',
-    url: 'https://blog.mozilla.org/'
-  },
-  {
-    title: 'Open-source project reaches new milestone',
-    source: 'GitHub Blog',
-    url: 'https://github.blog/'
-  },
-  {
-    title: 'Privacy tools you should know in 2026',
-    source: 'The Verge',
-    url: 'https://www.theverge.com/'
+import { onMounted, onUnmounted, ref } from 'vue'
+
+interface Story {
+  id: number
+  title: string
+  url: string
+  score: number
+  domain: string
+}
+
+const stories = ref<Story[]>([])
+const loading = ref(true)
+
+let intervalId: number
+
+async function fetchStories() {
+  try {
+    loading.value = true
+
+    const idsResponse = await fetch(
+      'https://hacker-news.firebaseio.com/v0/topstories.json'
+    )
+
+    const ids: number[] = await idsResponse.json()
+
+    const topIds = ids.slice(0, 5)
+
+    const results = await Promise.all(
+      topIds.map(async (id) => {
+        const response = await fetch(
+          `https://hacker-news.firebaseio.com/v0/item/${id}.json`
+        )
+
+        const item = await response.json()
+
+        let domain = 'Hacker News'
+
+        if (item.url) {
+          try {
+            domain = new URL(item.url).hostname.replace(
+              /^www\./,
+              ''
+            )
+          } catch {
+            domain = 'External'
+          }
+        }
+
+        return {
+          id: item.id,
+          title: item.title,
+          url: item.url || `https://news.ycombinator.com/item?id=${item.id}`,
+          score: item.score ?? 0,
+          domain
+        }
+      })
+    )
+
+    stories.value = results
+  } catch (error) {
+    console.error('Erro ao carregar notícias:', error)
+  } finally {
+    loading.value = false
   }
-]
+}
+
+onMounted(() => {
+  fetchStories()
+
+  intervalId = window.setInterval(
+    fetchStories,
+    600000 // 10 minutos
+  )
+})
+
+onUnmounted(() => {
+  clearInterval(intervalId)
+})
 </script>
 
 <style scoped>
 .panel {
   background: #d4d0c8;
-  min-width: 0;
+
+  border-top: 2px solid #ffffff;
+  border-left: 2px solid #ffffff;
+  border-right: 2px solid #808080;
+  border-bottom: 2px solid #808080;
 }
 
 .panel-header {
@@ -77,7 +139,12 @@ const newsList = [
 
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
+}
+
+.loading {
+  font-family: Tahoma, sans-serif;
+  font-size: 12px;
 }
 
 .news-item {
@@ -105,17 +172,18 @@ const newsList = [
 .news-title {
   font-size: 12px;
   font-weight: bold;
-  line-height: 1.2;
+
+  line-height: 1.3;
 }
 
-.news-source {
+.news-meta {
   margin-top: 2px;
 
   font-size: 11px;
   color: #666;
 }
 
-.news-item:hover .news-source {
+.news-item:hover .news-meta {
   color: #dcdcdc;
 }
 </style>
