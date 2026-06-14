@@ -2,7 +2,7 @@
   <div class="window">
     <div class="title-bar">
       <div class="title-bar-text">
-        Start Page &lt;3
+        Yume v1.1 - Start Page &lt;3
       </div>
 
       <div class="title-bar-controls">

@@ -12,16 +12,8 @@
         target="_blank"
         class="widget-card"
       >
-        <div class="widget-icon">
-          {{ widget.icon }}
-        </div>
-
         <div class="widget-title">
           {{ widget.title }}
-        </div>
-
-        <div class="widget-description">
-          {{ widget.description }}
         </div>
       </a>
     </div>
@@ -31,25 +23,21 @@
 <script setup>
 const widgets = [
   {
-    icon: "📬",
     title: "Inbox",
     description: "Check Gmail",
     url: "https://mail.google.com/"
   },
   {
-    icon: "🤖",
     title: "ChatGPT",
     description: "Open AI Assistant",
     url: "https://chatgpt.com/"
   },
   {
-    icon: "📰",
     title: "News",
     description: "Hacker News",
     url: "https://news.ycombinator.com/"
   },
   {
-    icon: "📅",
     title: "Calendar",
     description: "Google Calendar",
     url: "https://calendar.google.com/"

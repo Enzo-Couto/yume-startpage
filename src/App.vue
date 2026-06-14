@@ -17,6 +17,10 @@
           <NewsPanel />
         </div>
       </div>
+
+      <div class="bottom">
+        <SpotifyPanel />
+      </div>
     </WindowFrame>
   </div>
 </template>
@@ -33,6 +37,17 @@ import SearchPanel from './components/SearchPanel.vue'
 import WidgetsPanel from './components/WidgetsPanel.vue'
 
 import NewsPanel from './components/NewsPanel.vue'
+
+import { onMounted } from 'vue'
+import { handleSpotifyCallback } from './services/spotify'
+
+onMounted(async () => {
+  try {
+    await handleSpotifyCallback()
+  } catch (error) {
+    console.error('Spotify callback error:', error)
+  }
+})
 </script>
 
 <style scoped>
@@ -78,6 +93,10 @@ import NewsPanel from './components/NewsPanel.vue'
 
 .center {
   min-width: 420px;
+}
+
+.bottom {
+  margin-top: 12px;
 }
 
 /* Responsividade */

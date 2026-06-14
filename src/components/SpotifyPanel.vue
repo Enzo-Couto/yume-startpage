@@ -1,7 +1,7 @@
 <template>
   <div class="panel">
     <div class="panel-header">
-      🎵 Now Playing
+      Now Playing
     </div>
 
     <div class="panel-body">
@@ -64,7 +64,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
+
+import {
+  getAccessToken,
+  getCurrentlyPlaying,
+  loginSpotify
+} from '../services/spotify'
 
 const connected = ref(false)
 
@@ -80,10 +86,28 @@ const totalTime = ref('00:00')
 
 const progress = ref(0)
 
-function connectSpotify() {
-  alert(
-    'Spotify integration coming soon! 🎵'
-  )
+async function loadCurrentTrack() {
+  try {
+    connected.value = !!getAccessToken()
+
+    if (!connected.value) {
+      return
+    }
+
+    const track = await getCurrentlyPlaying()
+
+    console.log('Spotify: ', track)
+  } catch (error) {
+    console.error('Spotify error:', error)
+  }
+}
+
+onMounted(() => {
+  loadCurrentTrack()
+})
+
+async function connectSpotify() {
+  await loginSpotify()
 }
 </script>
 

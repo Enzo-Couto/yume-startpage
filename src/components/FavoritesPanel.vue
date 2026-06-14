@@ -1,7 +1,7 @@
 <template>
   <div class="panel">
     <div class="panel-header">
-      ♥ Favorites
+      Favorites
     </div>
 
     <div class="panel-body">
@@ -49,7 +49,6 @@ const favorites = [
 <style scoped>
 .panel {
   background: #d4d0c8;
-  margin-top: 8px;
 }
 
 .panel-header {
