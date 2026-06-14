@@ -22,7 +22,7 @@
           </div>
 
           <div class="track-status">
-            {{ connected ? 'Connected to Spotify' : 'Spotify not connected' }}
+            {{ status }}
           </div>
         </div>
       </div>
@@ -38,77 +38,122 @@
         <span>{{ currentTime }}</span>
         <span>{{ totalTime }}</span>
       </div>
-
-      <div class="controls">
-        <button disabled>
-          ⏮
-        </button>
-
-        <button disabled>
-          ▶
-        </button>
-
-        <button disabled>
-          ⏭
-        </button>
-      </div>
-
-      <button
-        class="connect-button"
-        @click="connectSpotify"
-      >
-        {{ connected ? 'Reconnect Spotify' : 'Connect Spotify' }}
-      </button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-
-import {
-  getAccessToken,
-  getCurrentlyPlaying,
-  loginSpotify
-} from '../services/spotify'
-
-const connected = ref(false)
+import { onMounted, onUnmounted, ref } from 'vue'
 
 const albumCover = ref(
   'https://placehold.co/64x64?text=%E2%99%AA'
 )
 
-const trackTitle = ref('No music playing')
-const artist = ref('Spotify')
+const trackTitle = ref('Nothing playing')
+const artist = ref('Yume Companion')
+
+const status = ref('Companion Offline')
 
 const currentTime = ref('00:00')
 const totalTime = ref('00:00')
 
 const progress = ref(0)
 
-async function loadCurrentTrack() {
-  try {
-    connected.value = !!getAccessToken()
+let interval: number
 
-    if (!connected.value) {
-      return
+function formatTime(ms: number) {
+  const minutes = Math.floor(ms / 60000)
+
+  const seconds = Math.floor(
+    (ms % 60000) / 1000
+  )
+
+  return `${minutes}:${seconds
+    .toString()
+    .padStart(2, '0')}`
+}
+
+async function loadTrack() {
+  try {
+    const response = await fetch(
+      'http://localhost:32145/current-track'
+    )
+
+    if (!response.ok) {
+      throw new Error()
     }
 
-    const track = await getCurrentlyPlaying()
+    const data = await response.json()
 
-    console.log('Spotify: ', track)
-  } catch (error) {
-    console.error('Spotify error:', error)
+    trackTitle.value =
+      data.title || 'Nothing playing'
+
+    artist.value =
+      data.artist || 'Unknown Artist'
+
+    status.value = data.isPlaying
+      ? '🟢 Playing'
+      : '⏸ Paused'
+
+    currentTime.value = formatTime(
+      data.progress || 0
+    )
+
+    totalTime.value = formatTime(
+      data.duration || 0
+    )
+
+    progress.value =
+      data.duration > 0
+        ? (data.progress / data.duration) * 100
+        : 0
+
+    if (
+      data.cover &&
+      data.cover.startsWith(
+        'spotify:image:'
+      )
+    ) {
+      const imageId = data.cover.replace(
+        'spotify:image:',
+        ''
+      )
+
+      albumCover.value =
+        `https://i.scdn.co/image/${imageId}`
+    }
+  } catch {
+    status.value = 'Companion Offline'
+
+    trackTitle.value =
+      'Nothing playing'
+
+    artist.value =
+      'Yume Companion'
+
+    currentTime.value = '00:00'
+
+    totalTime.value = '00:00'
+
+    progress.value = 0
+
+    albumCover.value =
+      'https://placehold.co/64x64?text=%E2%99%AA'
   }
 }
 
 onMounted(() => {
-  loadCurrentTrack()
+  loadTrack()
+
+  interval = window.setInterval(
+    loadTrack,
+    1000
+  )
 })
 
-async function connectSpotify() {
-  await loginSpotify()
-}
+onUnmounted(() => {
+  clearInterval(interval)
+})
 </script>
 
 <style scoped>
@@ -123,6 +168,7 @@ async function connectSpotify() {
 
 .panel-header {
   background: #4f6fcf;
+
   color: white;
 
   padding: 4px 8px;
@@ -138,6 +184,7 @@ async function connectSpotify() {
 
 .spotify-content {
   display: flex;
+
   gap: 10px;
 }
 
@@ -147,12 +194,12 @@ async function connectSpotify() {
 
   object-fit: cover;
 
+  background: white;
+
   border-top: 2px solid #808080;
   border-left: 2px solid #808080;
   border-right: 2px solid #ffffff;
   border-bottom: 2px solid #ffffff;
-
-  background: white;
 }
 
 .track-info {
@@ -167,11 +214,13 @@ async function connectSpotify() {
 
 .track-title {
   font-size: 13px;
+
   font-weight: bold;
 }
 
 .track-artist {
   font-size: 12px;
+
   color: #444;
 
   margin-top: 2px;
@@ -181,6 +230,7 @@ async function connectSpotify() {
   margin-top: 6px;
 
   font-size: 11px;
+
   color: #666;
 }
 
@@ -200,9 +250,11 @@ async function connectSpotify() {
 .progress-bar {
   height: 100%;
 
-  background: #4f6fcf;
+  background: #4caf50;
 
   width: 0%;
+
+  transition: width 0.3s ease;
 }
 
 .time-row {
@@ -213,24 +265,5 @@ async function connectSpotify() {
 
   font-family: Tahoma, sans-serif;
   font-size: 11px;
-}
-
-.controls {
-  margin-top: 10px;
-
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-}
-
-.controls button,
-.connect-button {
-  font-family: Tahoma, sans-serif;
-}
-
-.connect-button {
-  margin-top: 10px;
-
-  width: 100%;
 }
 </style>
